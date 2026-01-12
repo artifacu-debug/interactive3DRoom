@@ -1,0 +1,50 @@
+echo "# experimentation" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git branch -M main
+git remote add origin https://github.com/artifacu-debug/experimentation.git
+git push -u origin main
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D Scan Viewer</title>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+    <style>
+      body { margin: 0; font-family: sans-serif; } /* Added font-family for nicer text */
+      
+      model-viewer { width: 100vw; height: 100vh; }
+      
+      /* --- NEW: Text Styling --- */
+      #text-overlay {
+        position: absolute; /* This makes it float */
+        top: 20px;          /* Distance from top */
+        left: 20px;         /* Distance from left */
+        z-index: 10;        /* Ensures it sits ON TOP of the 3D model */
+        background: rgba(255, 255, 255, 0.8); /* Semi-transparent white box */
+        padding: 15px;
+        border-radius: 8px;
+        max-width: 300px;   /* Prevents it from getting too wide */
+      }
+      
+      h1 { margin: 0 0 5px 0; font-size: 1.2em; }
+      p { margin: 0; font-size: 0.9em; color: #333; }
+      /* ------------------------- */
+    </style>
+</head>
+<body>
+
+    <div id="text-overlay">
+        <h1>My Cool Scan</h1>
+        <p>This is a 3D scan of my room. Use one finger to rotate and two fingers to zoom.</p>
+    </div>
+    <model-viewer 
+      src="scan.glb" 
+      alt="My 3D Scan" 
+      auto-rotate 
+      camera-controls 
+      shadow-intensity="1">
+    </model-viewer>
+
+</body>
+</html>
