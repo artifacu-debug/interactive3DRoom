@@ -1,0 +1,89 @@
+import React, { useRef, useState, Suspense } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { OrbitControls, PerspectiveCamera, useGLTF, Environment, ContactShadows } from '@react-three/drei'
+import gsap from 'gsap'
+
+// 1. The Zoom Logic Component
+function CameraRig({ targetPos }) {
+  const { camera, controls } = useThree()
+  
+  useFrame(() => {
+    if (targetPos) {
+      // Smoothly move camera position to the target coordinates
+      gsap.to(camera.position, {
+        x: targetPos.x,
+        y: targetPos.y,
+        z: targetPos.z,
+        duration: 1.5,
+        ease: 'power3.inOut'
+      })
+      // Adjust the OrbitControls target to look directly at the object
+      gsap.to(controls.target, {
+        x: targetPos.lookX,
+        y: targetPos.lookY,
+        z: targetPos.lookZ,
+        duration: 1.5,
+        ease: 'power3.inOut'
+      })
+    }
+  })
+  return null
+}
+
+// 2. Interactive Object Component
+function OfficeObject({ modelPath, position, zoomCoords, setTarget }) {
+  const { scene } = useGLTF(modelPath)
+  return (
+    <primitive 
+      object={scene} 
+      position={position} 
+      onClick={(e) => {
+        e.stopPropagation()
+        setTarget(zoomCoords)
+      }}
+    />
+  )
+}
+
+// 3. Main Scene
+export default function App() {
+  const [target, setTarget] = useState(null)
+
+  return (
+    <Canvas shadows>
+      <PerspectiveCamera makeDefault position={[5, 5, 5]} fov={50} />
+      
+      {/* Lock vertical rotation for a "horizontal spin" feel */}
+      <OrbitControls 
+        makeDefault 
+        minPolarAngle={Math.PI / 2.5} 
+        maxPolarAngle={Math.PI / 2} 
+      />
+      
+      <ambientLight intensity={0.5} />
+      <pointLight position={[10, 10, 10]} intensity={1} />
+      
+      <Suspense fallback={null}>
+        {/* Your Office Room Mesh */}
+        <OfficeObject 
+          modelPath="/cubicle.glb" 
+          position={[0, 0, 0]} 
+          zoomCoords={null} 
+        />
+
+        {/* Example: A clickable object on the desk */}
+        <OfficeObject 
+          modelPath="/stapler.glb" 
+          position={[1.2, 0.8, -0.5]} 
+          zoomCoords={{ x: 1.5, y: 1.2, z: 0.5, lookX: 1.2, lookY: 0.8, lookZ: -0.5 }}
+          setTarget={setTarget}
+        />
+        
+        <CameraRig targetPos={target} />
+      </Suspense>
+      
+      <Environment preset="city" />
+      <ContactShadows opacity={0.4} scale={10} blur={2} far={4.5} />
+    </Canvas>
+  )
+}
